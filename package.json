@@ -9,7 +9,7 @@
     "browserify": "^16.2.2"
   },
   "scripts": {
-    "patch": "npm versuin patch && npm publish && git push",
+    "patch": "npm version patch && npm publish && git push",
     "prepare": "npm run build",
     "build": "tsc -p ./ && npm run _build-full && npm run _build-partial",
     "_build-full": "browserify src/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js",
