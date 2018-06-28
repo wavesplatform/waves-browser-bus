@@ -1,0 +1,7 @@
+{
+  "name": "waves-browser-bus",
+  "version": "0.0.1",
+  "dependencies": {
+    "ts-utils": "^6.0.2"
+  }
+}
