@@ -2,6 +2,7 @@
   "name": "@waves/waves-browser-bus",
   "version": "0.0.3",
   "main": "dist/browser-bus.min.js",
+  "types": "src/index.ts",
   "dependencies": {
     "ts-utils": "^6.0.2"
   },
