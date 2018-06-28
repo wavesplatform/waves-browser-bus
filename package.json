@@ -8,6 +8,10 @@
   "devDependencies": {
     "browserify": "^16.2.2"
   },
+  "files": [
+    "dist",
+    "src/**/*.ts"
+  ],
   "scripts": {
     "patch": "npm version patch && npm publish && git push",
     "prepare": "npm run build",
