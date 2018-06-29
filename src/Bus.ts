@@ -36,6 +36,7 @@ export class Bus {
         this._adapter.addListener((data) => this._onMessage(data));
         this._eventHandlers = Object.create(null);
         this._activeRequestHash = Object.create(null);
+        this._requestHandlers = Object.create(null);
     }
 
     public dispatchEvent(name: string): this {
