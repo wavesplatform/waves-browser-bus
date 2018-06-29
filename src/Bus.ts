@@ -143,8 +143,6 @@ export class Bus {
             case EventType.Response:
                 this._fireEndAction(message);
                 break;
-            default:
-                throw new Error('Wrong message type!');
         }
     }
 
