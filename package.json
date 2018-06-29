@@ -1,6 +1,6 @@
 {
   "name": "@waves/waves-browser-bus",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "dist/browser-bus.min.js",
   "types": "src/index.ts",
   "devDependencies": {
