@@ -1,4 +1,3 @@
-import { Signal, uniqueId } from 'ts-utils';
 import { Adapter } from './Adapter';
 import { IHash } from 'ts-utils/src/utils';
 
@@ -12,6 +11,12 @@ export const enum EventType {
 export const enum ResponseStatus {
     Success,
     Error
+}
+
+let counter = 0;
+
+function uniqueId(prefix?: string) {
+    return `${prefix || 'web-bus-id'}${counter++}`;
 }
 
 

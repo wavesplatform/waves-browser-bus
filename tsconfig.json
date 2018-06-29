@@ -8,10 +8,7 @@
       "dom",
       "es2015",
       "es2015.promise"
-    ],
-    "paths": {
-      "ts-utils": ["node_modules/ts-utils"]
-    }
+    ]
   },
   "exclude": [
     "node_modules"

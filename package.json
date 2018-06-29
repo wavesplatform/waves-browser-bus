@@ -3,9 +3,6 @@
   "version": "0.0.4",
   "main": "dist/browser-bus.min.js",
   "types": "src/index.ts",
-  "dependencies": {
-    "ts-utils": "^6.0.2"
-  },
   "devDependencies": {
     "browserify": "^16.2.2"
   },
@@ -16,8 +13,7 @@
   "scripts": {
     "patch": "npm version patch && npm publish && git push",
     "prepare": "npm run build",
-    "build": "tsc -p ./ && npm run _build-full && npm run _build-partial",
-    "_build-full": "browserify src/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js",
-    "_build-partial": "browserify src/index.js -s bus -u ts-utils -o ./dist/browse-bus.partial.js && uglifyjs ./dist/browser-bus.js -o ./dist/browse-bus.partial.min.js"
+    "build": "tsc -p ./ && npm run _build-full",
+    "_build-full": "browserify src/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js"
   }
 }
