@@ -16,7 +16,7 @@ export const enum ResponseStatus {
 let counter = 0;
 
 function uniqueId(prefix?: string) {
-    return `${prefix || 'web-bus-id'}${counter++}`;
+    return `${prefix}-${counter++}`;
 }
 
 
@@ -39,8 +39,8 @@ export class Bus {
         this._requestHandlers = Object.create(null);
     }
 
-    public dispatchEvent(name: string): this {
-        this._adapter.send(Bus._createEvent(name));
+    public dispatchEvent(name: string, data?: any): this {
+        this._adapter.send(Bus._createEvent(name, data));
         return this;
     }
 
@@ -221,10 +221,11 @@ export class Bus {
         }
     }
 
-    static _createEvent(eventName: string): IEventData {
+    static _createEvent(eventName: string, data: any): IEventData {
         return {
             type: EventType.Event,
-            name: eventName
+            name: eventName,
+            data
         };
     }
 
