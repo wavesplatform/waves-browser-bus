@@ -4,12 +4,20 @@
   "main": "dist/browser-bus.min.js",
   "types": "src/index.ts",
   "devDependencies": {
-    "browserify": "^16.2.2"
+    "@types/jest": "^23.1.4",
+    "browserify": "^16.2.2",
+    "jest": "^23.3.0",
+    "ts-utils": "^6.0.2",
+    "typescript": "^2.9.2"
   },
   "files": [
     "dist",
     "src/**/*.ts"
   ],
+  "jest": {
+    "collectCoverage": true,
+    "coverageFormats": ["json", "html"]
+  },
   "scripts": {
     "patch": "npm version patch && npm publish && git push",
     "prepare": "npm run build",

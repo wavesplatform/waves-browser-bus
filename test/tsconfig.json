@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "lib": [
+      "es5",
+      "es2015",
+      "es2015.promise",
+      "dom"
+    ],
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

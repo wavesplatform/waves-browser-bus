@@ -243,7 +243,7 @@ export type TMessageContent = IEventData | IRequestData | IResponseData;
 export interface IEventData {
     type: EventType.Event;
     name: string;
-    data?: object | Array<object>;
+    data?: any;
 }
 
 export interface IRequestData {
