@@ -45,6 +45,30 @@ describe('Bus', () => {
         expect(wasCall).toBe(2);
     });
 
+    it('change adapter', () => {
+        let count = 0;
+
+        bus.once('some-event', () => {
+            count++;
+        });
+
+        bus.on('some-event', () => {
+            count++;
+        });
+
+        bus.registerRequestHandler('some-request', () => {
+            count++;
+        });
+
+        const newAdapter = new MockAdapter();
+        const newBus = bus.changeAdapter(newAdapter);
+
+        newAdapter.dispatchAdapterEvent({ name: 'some-request', id: 0, type: EventType.Action });
+        newAdapter.dispatchAdapterEvent({ name: 'some-event', type: EventType.Event });
+
+        expect(count).toBe(3);
+    });
+
     describe('event emitter', () => {
         const event = {
             type: EventType.Event,
@@ -106,9 +130,39 @@ describe('Bus', () => {
             expect(count).toBe(1);
         });
 
+        it('should call second handler', () => {
+            let count = 0;
+            const eventName = 'some-event';
+            [
+                () => {
+                    throw new Error('Some error!');
+                },
+                () => count++
+            ].forEach(f => {
+                bus.on(eventName, f);
+            });
+
+            adapter.dispatchAdapterEvent({
+                name: eventName,
+                type: EventType.Event
+            });
+
+            expect(count).toBe(1);
+        });
+
     });
 
     describe('request api', () => {
+
+        it('timeout error', (done) => {
+            const adapter = new MockAdapter();
+            const bus = new Bus(adapter, 50);
+
+            bus.request('some-event').catch((e) => {
+                expect(e.message).toBe('Timeout error!');
+                done();
+            });
+        });
 
         it('response without request', () => {
             adapter.dispatchAdapterEvent({
