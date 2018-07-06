@@ -1,4 +1,5 @@
 import { IHash, Signal } from 'ts-utils';
+import { IWindowPart } from '../../src';
 
 
 class Win {
@@ -36,10 +37,10 @@ class Win {
 }
 
 export function mockWindow<T>(): IMockWindow<T> {
-    return new Win() as any;
+    return new Win();
 }
 
-export interface IMockWindow<T> extends Window {
+export interface IMockWindow<T> extends IWindowPart {
     onPostMessageRun: Signal<IPostMessageEvent<T>>;
     runEventListeners(event: string, eventData: any);
 }

@@ -15,7 +15,7 @@ export const enum ResponseStatus {
 
 let counter = 0;
 
-function uniqueId(prefix?: string) {
+function uniqueId(prefix: string): string {
     return `${prefix}-${counter++}`;
 }
 

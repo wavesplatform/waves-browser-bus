@@ -54,5 +54,10 @@ export class WindowAdapter extends Adapter {
 
 export interface IWindowData {
     origin: string;
-    win: Window;
+    win: IWindowPart;
+}
+
+export interface IWindowPart {
+    postMessage: typeof Window['postMessage'];
+    addEventListener: typeof Window['postMessage']
 }
