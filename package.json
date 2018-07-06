@@ -7,6 +7,7 @@
     "@types/jest": "^23.1.4",
     "browserify": "^16.2.2",
     "jest": "^23.3.0",
+    "ts-jest": "^23.0.0",
     "ts-utils": "^6.0.2",
     "typescript": "^2.9.2"
   },
@@ -16,7 +17,21 @@
   ],
   "jest": {
     "collectCoverage": true,
-    "coverageFormats": ["json", "html"]
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testMatch": [
+      "**/test/*.+(ts|tsx|js)"
+    ]
   },
   "scripts": {
     "patch": "npm version patch && npm publish && git push",

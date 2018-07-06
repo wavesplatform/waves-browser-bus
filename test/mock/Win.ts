@@ -11,6 +11,13 @@ class Win {
         this.onPostMessageRun.dispatch({ data, origin });
     }
 
+    public removeEventListener(event, handler) {
+        if (!this._handlers[event]) {
+            return null;
+        }
+        this._handlers[event] = this._handlers[event].filter(cb => cb !== handler);
+    }
+
     public addEventListener(event: string, handler: Function) {
         if (!this._handlers[event]) {
             this._handlers[event] = [];

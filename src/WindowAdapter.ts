@@ -22,6 +22,10 @@ export class WindowAdapter extends Adapter {
     }
 
     public send(data: TMessageContent): this {
+        if (!this._dispatch) {
+            return this;
+        }
+
         this._dispatch.win.postMessage(data, this._dispatch.origin);
         return this;
     }
@@ -31,7 +35,7 @@ export class WindowAdapter extends Adapter {
         return this;
     }
 
-    public destroy() {
+    public destroy(): void {
         this._listen.win.removeEventListener('message', this._mainListener, false);
         this._listeners = [];
         this._listen = null;
