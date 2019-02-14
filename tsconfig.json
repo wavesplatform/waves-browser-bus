@@ -12,6 +12,9 @@
       "es2015.promise"
     ]
   },
+  "files": [
+    "src/index.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

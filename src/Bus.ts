@@ -1,5 +1,4 @@
 import { Adapter } from './Adapter';
-import { IHash } from 'ts-utils/src/utils';
 
 
 export const enum EventType {
@@ -24,10 +23,10 @@ export class Bus {
 
     public id: string = uniqueId('bus');
     private _adapter: Adapter;
-    private readonly _activeRequestHash: IHash<ISentActionData>;
+    private readonly _activeRequestHash: Record<string, ISentActionData>;
     private readonly _timeout: number;
-    private readonly _eventHandlers: IHash<IEventHandlerData[]>;
-    private readonly _requestHandlers: IHash<IOneArgFunction<any, any>>;
+    private readonly _eventHandlers: Record<string, IEventHandlerData[]>;
+    private readonly _requestHandlers: Record<string, IOneArgFunction<any, any>>;
 
 
     constructor(adapter: Adapter, defaultTimeout?: number) {
