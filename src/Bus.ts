@@ -48,7 +48,8 @@ export class Bus {
         return new Promise<any>((resolve, reject) => {
             const id = uniqueId(`${this.id}-action`);
 
-            let timer;
+            let timer: number;
+
             if ((timeout || this._timeout) !== -1) {
                 timer = setTimeout(() => {
                     delete this._activeRequestHash[id];
@@ -58,9 +59,9 @@ export class Bus {
 
             this._activeRequestHash[id] = {
                 reject,
-                resolve: data => {
+                resolve: (data: any) => {
                     if (timer) {
-                        clearTimeout(timer);
+                        window.clearTimeout(timer);
                     }
                     resolve(data);
                 }
@@ -104,7 +105,7 @@ export class Bus {
         return this;
     }
 
-    public registerRequestHandler(name: string, handler: IOneArgFunction<void, any>): this {
+    public registerRequestHandler(name: string, handler: IOneArgFunction<any, any>): this {
         if (this._requestHandlers[name]) {
             throw new Error('Duplicate request handler!');
         }
@@ -166,7 +167,7 @@ export class Bus {
     }
 
     private _createResponse(message: IRequestData) {
-        const sendError = (error) => {
+        const sendError = (error: Error) => {
             this._adapter.send({
                 id: message.id,
                 type: EventType.Response,

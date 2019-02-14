@@ -1,4 +1,4 @@
-import { Bus, EventType, IEventData } from '../src';
+import { Bus, EventType, TMessageContent } from '../src';
 import { MockAdapter } from './mock/MockAdapter';
 
 
@@ -26,7 +26,12 @@ describe('Bus', () => {
         const eventData = { some: true };
         let wasCall = 0;
 
-        adapter.onSend.once((eventData: IEventData) => {
+        adapter.onSend.once((eventData: TMessageContent) => {
+
+            if (eventData.type !== EventType.Event) {
+                throw new Error('Wrong event type!');
+            }
+
             expect(eventData.type).toBe(EventType.Event);
             expect(eventData.name).toBe(eventName);
             expect(eventData.data).toBe(undefined);
@@ -35,9 +40,12 @@ describe('Bus', () => {
 
         bus.dispatchEvent(eventName);
 
-        adapter.onSend.once(({ data }: IEventData) => {
+        adapter.onSend.once((event: TMessageContent) => {
+            if (event.type !== EventType.Event) {
+                throw new Error('Wrong event type!');
+            }
             wasCall++;
-            expect(data).toBe(eventData);
+            expect(event.data).toBe(eventData);
         });
 
         bus.dispatchEvent(eventName, eventData);
@@ -175,7 +183,7 @@ describe('Bus', () => {
             const requestData = {
                 count: 0,
                 name: 'getRequestCount',
-                handler: c => {
+                handler: (c: number) => {
                     requestData.count++;
                     return requestData.count + c;
                 }
@@ -202,7 +210,7 @@ describe('Bus', () => {
             const requestData = {
                 count: 0,
                 name: 'getRequestCount',
-                handler: c => {
+                handler: (c: number) => {
                     requestData.count++;
                     return Promise.resolve(requestData.count + c);
                 }
@@ -233,7 +241,7 @@ describe('Bus', () => {
         it('has no handler for request', done => {
             const requestData = {
                 name: 'getRequestCount',
-                handler: c => null
+                handler: () => null
             };
 
             const secondAdapter = new MockAdapter();

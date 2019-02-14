@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "experimentalDecorators": true,
+    "baseUrl": "./",
+    "module": "commonjs",
     "target": "es5",
+    "sourceMap": true,
     "lib": [
-      "es5",
+      "dom",
       "es2015",
-      "es2015.promise",
-      "dom"
-    ],
-    "sourceMap": true
+      "es2015.promise"
+    ]
   },
   "exclude": [
     "node_modules"

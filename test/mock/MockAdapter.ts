@@ -19,7 +19,7 @@ export class MockAdapter extends Adapter {
         return this;
     }
 
-    public dispatchAdapterEvent(e: TMessageContent) {
+    public dispatchAdapterEvent(e: TMessageContent): void {
         this.listeners.forEach(cb => cb(e));
     }
 

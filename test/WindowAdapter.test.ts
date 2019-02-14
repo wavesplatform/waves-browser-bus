@@ -28,6 +28,34 @@ describe('Window adapter', () => {
         adapter = new WindowAdapter(listen, dispatch);
     });
 
+    it('all origin', () => {
+        listen = {
+            win: mockWindow(),
+            origin: '*'
+        };
+
+        dispatch = {
+            win: mockWindow(),
+            origin: '*'
+        };
+
+        adapter = new WindowAdapter(listen, dispatch);
+
+        let count = 0;
+
+        adapter.addListener(() => {
+            count++;
+        });
+
+        listen.win.runEventListeners('message', {
+            origin: 'https://dispatch-origin.com',
+            data: null
+        });
+
+        expect(count).toBe(1);
+
+    });
+
     it('send', () => {
         let wasEvent = false;
 
@@ -85,6 +113,7 @@ describe('Window adapter', () => {
         });
 
         const destroyResult = adapter.destroy();
+        adapter.destroy();
 
         adapter.send(eventData);
         listen.win.runEventListeners('message', {

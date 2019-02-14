@@ -8,27 +8,27 @@ class Win {
     private _handlers: IHash<Array<Function>> = Object.create(null);
 
 
-    public postMessage(data: any, origin: string) {
+    public postMessage(data: any, origin: string): void {
         this.onPostMessageRun.dispatch({ data, origin });
     }
 
-    public removeEventListener(event, handler) {
+    public removeEventListener(event: string, handler: any): void {
         if (!this._handlers[event]) {
-            return null;
+            return void 0;
         }
         this._handlers[event] = this._handlers[event].filter(cb => cb !== handler);
     }
 
-    public addEventListener(event: string, handler: Function) {
+    public addEventListener(event: string, handler: Function): void {
         if (!this._handlers[event]) {
             this._handlers[event] = [];
         }
         this._handlers[event].push(handler);
     }
 
-    public runEventListeners(event: string, eventData: any) {
+    public runEventListeners(event: string, eventData: any): void {
         if (!this._handlers[event]) {
-            return null;
+            return void 0;
         }
 
         this._handlers[event].forEach(cb => cb(eventData));
@@ -42,7 +42,7 @@ export function mockWindow<T>(): IMockWindow<T> {
 
 export interface IMockWindow<T> extends IWindowPart {
     onPostMessageRun: Signal<IPostMessageEvent<T>>;
-    runEventListeners(event: string, eventData: any);
+    runEventListeners(event: string, eventData: any): void;
 }
 
 export interface IPostMessageEvent<T> {

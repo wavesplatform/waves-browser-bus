@@ -4,16 +4,20 @@ import { IOneArgFunction, TMessageContent } from './Bus';
 
 export class WindowAdapter extends Adapter {
 
-    private _availableDomains: Array<string>;
-    private _dispatch: IWindowData;
     private _listen: IWindowData;
     private _listeners: Array<IOneArgFunction<TMessageContent, void>>;
-    private _mainListener: (event: MessageEvent) => void;
+    private _dispatch: IWindowData;
+    private readonly _availableDomains: Record<string, boolean>;
+    private readonly _mainListener: (event: MessageEvent) => void;
 
 
     constructor(listen: IWindowData, dispatch: IWindowData, availableDomains?: Array<string>) {
         super();
-        this._availableDomains = [listen.origin, dispatch.origin].concat(availableDomains || []);
+        this._availableDomains = WindowAdapter._originsToHash([
+            listen.origin,
+            dispatch.origin,
+            ...(availableDomains || [])
+        ]);
         this._dispatch = dispatch;
         this._listen = listen;
         this._listeners = [];
@@ -23,10 +27,6 @@ export class WindowAdapter extends Adapter {
     }
 
     public send(data: TMessageContent): this {
-        if (!this._dispatch) {
-            return this;
-        }
-
         this._dispatch.win.postMessage(data, this._dispatch.origin);
         return this;
     }
@@ -37,18 +37,34 @@ export class WindowAdapter extends Adapter {
     }
 
     public destroy(): void {
+
+        const empty = () => null;
+        const fakeData = {
+            origin: '',
+            win: {
+                postMessage: empty,
+                addEventListener: empty,
+                removeEventListener: empty
+            }
+        };
+
         this._listen.win.removeEventListener('message', this._mainListener, false);
         this._listeners = [];
-        this._listen = null;
-        this._dispatch = null;
+
+        this._dispatch = fakeData;
+        this._listen = fakeData;
     }
 
     private _onEvent(event: MessageEvent): void {
-        if (this._availableDomains.indexOf(event.origin) !== -1) {
+        if (this._availableDomains['*'] || this._availableDomains[event.origin]) {
             this._listeners.forEach((handler) => {
                 handler(event.data);
             });
         }
+    }
+
+    private static _originsToHash(list: Array<string>): Record<string, boolean> {
+        return list.reduce((hash, item) => (hash[item] = true, hash), Object.create(null));
     }
 
 }
