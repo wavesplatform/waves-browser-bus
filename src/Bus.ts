@@ -58,7 +58,12 @@ export class Bus {
             }
 
             this._activeRequestHash[id] = {
-                reject,
+                reject: (error: any) => {
+                    if (timer) {
+                        window.clearTimeout(timer);
+                    }
+                    reject(error);
+                },
                 resolve: (data: any) => {
                     if (timer) {
                         window.clearTimeout(timer);
@@ -260,15 +265,18 @@ export interface IOneArgFunction<T, R> {
 }
 
 export type TMessageContent = IEventData | IRequestData | IResponseData;
+export type TChanelId = string | number;
 
 export interface IEventData {
     type: EventType.Event;
+    chanelId?: TChanelId | undefined;
     name: string;
     data?: any;
 }
 
 export interface IRequestData {
     id: string | number;
+    chanelId?: TChanelId | undefined;
     type: EventType.Action;
     name: string;
     data?: object | Array<object>;
@@ -276,6 +284,7 @@ export interface IRequestData {
 
 export interface IResponseData {
     id: string | number;
+    chanelId?: TChanelId | undefined;
     type: EventType.Response;
     status: ResponseStatus;
     content: object | Array<object>;

@@ -1,4 +1,4 @@
-import { WindowAdapter, EventType, IEventData } from '../src';
+import { EventType, IEventData, WindowAdapter } from '../src';
 import { IMockWindow, mockWindow } from './mock/Win';
 
 
@@ -7,7 +7,8 @@ describe('Window adapter', () => {
     const eventData: IEventData = {
         type: EventType.Event,
         name: 'test',
-        data: 'some data for event'
+        data: 'some data for event',
+        chanelId: undefined
     };
 
     let listen: ITestWinData;
@@ -26,6 +27,48 @@ describe('Window adapter', () => {
         };
 
         adapter = new WindowAdapter(listen, dispatch);
+    });
+
+    describe('check connect by chanel id', () => {
+
+        it('with same chain id', () => {
+
+            let ok = false;
+
+            adapter = new WindowAdapter(listen, dispatch, {
+                chanelId: 1,
+                availableDomains: ['*'],
+                availableChanelId: [2]
+            });
+
+            adapter.addListener(event => {
+                ok = event.type === EventType.Event && event.data === 1 && event.name === 'test';
+            });
+
+            listen.win.runEventListeners('message', {
+                origin: 'https://some-origin.com',
+                data: {
+                    type: EventType.Event,
+                    data: 1,
+                    name: 'test'
+                }
+            });
+
+            expect(ok).toBe(false);
+
+            listen.win.runEventListeners('message', {
+                origin: 'https://some-origin.com',
+                data: {
+                    type: EventType.Event,
+                    data: 1,
+                    name: 'test',
+                    chanelId: 2
+                }
+            });
+
+            expect(ok).toBe(true);
+        });
+
     });
 
     it('all origin', () => {
@@ -59,10 +102,10 @@ describe('Window adapter', () => {
     it('send', () => {
         let wasEvent = false;
 
-        dispatch.win.onPostMessageRun.once((message) => {
+        dispatch.win.onPostMessageRun.once(message => {
             wasEvent = true;
             expect(message.origin).toBe(dispatch.origin);
-            expect(message.data).toBe(eventData);
+            expect(message.data).toEqual(eventData);
         });
         const sendResult = adapter.send(eventData);
 

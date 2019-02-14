@@ -30,7 +30,7 @@
       "^.+\\.(ts|tsx)$": "ts-jest"
     },
     "testMatch": [
-      "**/test/*test.+(ts|tsx|js)"
+      "**/test/*test.+(ts)"
     ]
   },
   "scripts": {
