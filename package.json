@@ -4,12 +4,12 @@
   "main": "dist/browser-bus.min.js",
   "types": "src/index.ts",
   "devDependencies": {
-    "@types/jest": "^23.1.4",
-    "browserify": "^16.2.2",
-    "jest": "^23.3.0",
-    "ts-jest": "^23.0.0",
-    "ts-utils": "^6.0.2",
-    "typescript": "^2.9.2"
+    "@types/jest": "^24.0.4",
+    "browserify": "^16.2.3",
+    "jest": "^24.1.0",
+    "ts-jest": "^23.10.5",
+    "ts-utils": "^6.0.6",
+    "typescript": "^3.3.3"
   },
   "files": [
     "dist",
@@ -30,13 +30,14 @@
       "^.+\\.(ts|tsx)$": "ts-jest"
     },
     "testMatch": [
-      "**/test/*.+(ts|tsx|js)"
+      "**/test/*test.+(ts|tsx|js)"
     ]
   },
   "scripts": {
     "patch": "npm version patch && npm publish && git push",
     "prepare": "npm run build",
     "build": "tsc -p ./ && npm run _build-full",
+    "test": "jest",
     "_build-full": "browserify src/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js"
   }
 }

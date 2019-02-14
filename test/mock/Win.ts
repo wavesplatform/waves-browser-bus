@@ -37,7 +37,7 @@ class Win {
 }
 
 export function mockWindow<T>(): IMockWindow<T> {
-    return new Win();
+    return new Win() as any;
 }
 
 export interface IMockWindow<T> extends IWindowPart {

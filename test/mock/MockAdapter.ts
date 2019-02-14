@@ -11,10 +11,12 @@ export class MockAdapter extends Adapter {
 
     public send(data: TMessageContent): this {
         this.onSend.dispatch(data);
+        return this;
     }
 
     public addListener(cb: IOneArgFunction<TMessageContent, void>): this {
         this.listeners.push(cb);
+        return this;
     }
 
     public dispatchAdapterEvent(e: TMessageContent) {

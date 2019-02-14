@@ -24,10 +24,10 @@ export class Bus {
 
     public id: string = uniqueId('bus');
     private _adapter: Adapter;
-    private _activeRequestHash: IHash<ISentActionData>;
-    private _timeout: number;
-    private _eventHandlers: IHash<IEventHandlerData[]>;
-    private _requestHandlers: IHash<IOneArgFunction<any, any>>;
+    private readonly _activeRequestHash: IHash<ISentActionData>;
+    private readonly _timeout: number;
+    private readonly _eventHandlers: IHash<IEventHandlerData[]>;
+    private readonly _requestHandlers: IHash<IOneArgFunction<any, any>>;
 
 
     constructor(adapter: Adapter, defaultTimeout?: number) {
@@ -39,7 +39,7 @@ export class Bus {
         this._requestHandlers = Object.create(null);
     }
 
-    public dispatchEvent(name: string, data?: any): this {
+    public dispatchEvent(name: string, data?: unknown): this {
         this._adapter.send(Bus._createEvent(name, data));
         return this;
     }
@@ -47,22 +47,34 @@ export class Bus {
     public request<T>(name: string, data?: any, timeout?: number): Promise<T> {
         return new Promise<any>((resolve, reject) => {
             const id = uniqueId(`${this.id}-action`);
-            this._activeRequestHash[id] = { reject, resolve };
 
-            setTimeout(() => {
-                delete this._activeRequestHash[id];
-                reject(new Error('Timeout error!'));
-            }, timeout || this._timeout);
+            let timer;
+            if ((timeout || this._timeout) !== -1) {
+                timer = setTimeout(() => {
+                    delete this._activeRequestHash[id];
+                    reject(new Error('Timeout error!'));
+                }, timeout || this._timeout);
+            }
+
+            this._activeRequestHash[id] = {
+                reject,
+                resolve: data => {
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    resolve(data);
+                }
+            };
 
             this._adapter.send({ id, type: EventType.Action, name, data });
         });
     }
 
-    public on(name: string, handler: IOneArgFunction<any, void>, context: any): this {
+    public on(name: string, handler: IOneArgFunction<any, void>, context?: any): this {
         return this._addEventHandler(name, handler, context, false);
     }
 
-    public once(name: string, handler: IOneArgFunction<any, void>, context: any): this {
+    public once(name: string, handler: IOneArgFunction<any, void>, context?: any): this {
         return this._addEventHandler(name, handler, context, true);
     }
 
@@ -99,6 +111,13 @@ export class Bus {
 
         this._requestHandlers[name] = handler;
 
+        return this;
+    }
+
+    public unregisterHandler(name: string): this {
+        if (this._requestHandlers[name]) {
+            delete this._requestHandlers[name];
+        }
         return this;
     }
 
@@ -248,14 +267,14 @@ export interface IEventData {
 }
 
 export interface IRequestData {
-    id: string;
+    id: string | number;
     type: EventType.Action;
     name: string;
     data?: object | Array<object>;
 }
 
 export interface IResponseData {
-    id: string;
+    id: string | number;
     type: EventType.Response;
     status: ResponseStatus;
     content: object | Array<object>;

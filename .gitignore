@@ -1,6 +1,5 @@
 .idea
 node_modules
 coverage
-package-lock.json
 **/*.js
 **/*.js.map

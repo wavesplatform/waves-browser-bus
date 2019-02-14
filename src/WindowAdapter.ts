@@ -1,6 +1,7 @@
 import { Adapter } from './Adapter';
 import { IOneArgFunction, TMessageContent } from './Bus';
 
+
 export class WindowAdapter extends Adapter {
 
     private _availableDomains: Array<string>;
@@ -58,6 +59,7 @@ export interface IWindowData {
 }
 
 export interface IWindowPart {
-    postMessage: typeof Window['postMessage'];
-    addEventListener: typeof Window['postMessage']
+    postMessage: typeof window['postMessage'];
+    addEventListener: typeof window['addEventListener']
+    removeEventListener: typeof window['removeEventListener'];
 }

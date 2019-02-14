@@ -35,7 +35,7 @@ describe('Bus', () => {
 
         bus.dispatchEvent(eventName);
 
-        adapter.onSend.once(({ data }) => {
+        adapter.onSend.once(({ data }: IEventData) => {
             wasCall++;
             expect(data).toBe(eventData);
         });
@@ -89,9 +89,9 @@ describe('Bus', () => {
                 expect(data).toBe(event.data);
             });
 
-            adapter.dispatchAdapterEvent(event);
-            adapter.dispatchAdapterEvent({ ...event, name: 'new' });
-            adapter.dispatchAdapterEvent(event);
+            adapter.dispatchAdapterEvent(event as any);
+            adapter.dispatchAdapterEvent({ ...event, name: 'new' } as any);
+            adapter.dispatchAdapterEvent(event as any);
 
             expect(count).toBe(4);
         });
@@ -104,9 +104,9 @@ describe('Bus', () => {
                 expect(data).toBe(event.data);
             });
 
-            adapter.dispatchAdapterEvent(event);
-            adapter.dispatchAdapterEvent({ ...event, name: 'new' });
-            adapter.dispatchAdapterEvent(event);
+            adapter.dispatchAdapterEvent(event as any);
+            adapter.dispatchAdapterEvent({ ...event, name: 'new' } as any);
+            adapter.dispatchAdapterEvent(event as any);
 
             expect(count).toBe(1);
         });
@@ -121,12 +121,12 @@ describe('Bus', () => {
             });
             bus.off(event.name, handlers[0]).off('some-event');
 
-            adapter.dispatchAdapterEvent(event);
+            adapter.dispatchAdapterEvent(event as any);
             expect(count).toBe(1);
 
             bus.off();
 
-            adapter.dispatchAdapterEvent(event);
+            adapter.dispatchAdapterEvent(event as any);
             expect(count).toBe(1);
         });
 
@@ -168,7 +168,7 @@ describe('Bus', () => {
             adapter.dispatchAdapterEvent({
                 type: EventType.Response,
                 id: 'some'
-            });
+            } as any);
         });
 
         it('request', (done) => {
@@ -221,11 +221,16 @@ describe('Bus', () => {
             bus.request(requestData.name, 10, 100)
                 .then((r) => {
                     expect(r).toBe(11);
-                    done();
+
+                    secondBus.unregisterHandler(requestData.name);
+
+                    bus.request(requestData.name, 10, 100).catch(() => {
+                        done();
+                    });
                 });
         });
 
-        it('has no handler for request', () => {
+        it('has no handler for request', done => {
             const requestData = {
                 name: 'getRequestCount',
                 handler: c => null
@@ -246,7 +251,7 @@ describe('Bus', () => {
                 });
         });
 
-        it('handler with exception', () => {
+        it('handler with exception', done => {
             const requestData = {
                 count: 0,
                 name: 'getRequestCount',
@@ -266,7 +271,7 @@ describe('Bus', () => {
             });
 
             bus.request(requestData.name, 10, 100)
-                .catch((r) => {
+                .catch((e) => {
                     expect(e.message).toBe('Test error!');
                     done();
                 });

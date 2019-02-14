@@ -46,7 +46,7 @@ describe('Window adapter', () => {
         let count = 0;
         const data = ['test 1', 'test 2'];
 
-        const addListenerResult = adapter.addListener((eventData) => {
+        const addListenerResult = adapter.addListener((eventData: any) => {
             if (eventData !== data[count]) {
                 throw new Error('Wrong data in event!');
             }
