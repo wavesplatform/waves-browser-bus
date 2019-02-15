@@ -1,4 +1,4 @@
-import { IOneArgFunction, TMessageContent } from './Bus';
+import { IOneArgFunction, TMessageContent } from '../bus/Bus';
 
 
 export abstract class Adapter {

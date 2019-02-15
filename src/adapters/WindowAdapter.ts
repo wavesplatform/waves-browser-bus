@@ -1,9 +1,11 @@
 import { Adapter } from './Adapter';
-import { IOneArgFunction, TChanelId, TMessageContent } from './Bus';
+import { IOneArgFunction, TChanelId, TMessageContent } from '../bus/Bus';
+import { console, uniqueId } from '../utils';
 
 
 export class WindowAdapter extends Adapter {
 
+    public id: string = uniqueId('wa');
     private _listen: WindowAdapter.IWindowData;
     private _listeners: Array<IOneArgFunction<TMessageContent, void>>;
     private _dispatch: WindowAdapter.IWindowData;
@@ -28,6 +30,7 @@ export class WindowAdapter extends Adapter {
         this._availableChanelId = options && options.availableChanelId || null;
 
         this._listen.win.addEventListener('message', this._mainListener, false);
+        console.info(`Create WindowAdapter with id "${this.id}"`);
     }
 
     public send(data: TMessageContent): this {
@@ -57,6 +60,8 @@ export class WindowAdapter extends Adapter {
 
         this._dispatch = fakeData;
         this._listen = fakeData;
+
+        console.info('Destroy WindowAdapter');
     }
 
     private _onEvent(event: IMessage): void {
@@ -69,6 +74,7 @@ export class WindowAdapter extends Adapter {
 
     private accessEvent(event: IMessage): boolean {
         if (!this._availableDomains['*'] && !this._availableDomains[event.origin]) {
+            console.info(`Block event by origin "${event.origin}"`);
             return false;
         }
 
@@ -76,7 +82,13 @@ export class WindowAdapter extends Adapter {
             return true;
         }
 
-        return !!(event.data.chanelId && this._availableChanelId.indexOf(event.data.chanelId) !== -1);
+        const access = !!(event.data.chanelId && this._availableChanelId.indexOf(event.data.chanelId) !== -1);
+
+        if (!access) {
+            console.info(`Block event by chanel id "${event.data.chanelId}"`);
+        }
+
+        return access;
     }
 
     private static _originsToHash(list: Array<string>): Record<string, boolean> {

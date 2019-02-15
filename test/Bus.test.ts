@@ -1,5 +1,6 @@
-import { Bus, EventType, TMessageContent } from '../src';
+import { Bus, EventType, TMessageContent, console, config } from '../src';
 import { MockAdapter } from './mock/MockAdapter';
+import { Signal } from 'ts-utils';
 
 
 describe('Bus', () => {
@@ -8,8 +9,18 @@ describe('Bus', () => {
     let bus: Bus;
 
     beforeEach(() => {
+        config.console.logLevel = config.console.LOG_LEVEL.PRODUCTION;
         adapter = new MockAdapter();
         bus = new Bus(adapter);
+    });
+
+    it('destroy', () => {
+        let counter = 0;
+        adapter.destroy = () => {
+            counter++;
+        };
+        bus.destroy();
+        expect(counter).toBe(1);
     });
 
     it('bus id is unique', () => {
@@ -51,6 +62,98 @@ describe('Bus', () => {
         bus.dispatchEvent(eventName, eventData);
 
         expect(wasCall).toBe(2);
+    });
+
+    describe('console', () => {
+
+        const consoleModule = (function (root: { console: Console }) {
+            return root.console;
+        })(self || global);
+
+        const originError = consoleModule.error;
+        const originInfo = consoleModule.info;
+
+        let info: Signal<Array<any>>;
+        let error: Signal<Array<any>>;
+
+        beforeEach(() => {
+            info = new Signal<Array<any>>();
+            error = new Signal<Array<any>>();
+            consoleModule.info = (...args: Array<any>) => {
+                info.dispatch(args);
+            };
+            consoleModule.error = (...args: Array<any>) => {
+                error.dispatch(args);
+            };
+        });
+
+        it('Check production level', done => {
+
+            let counter = 0;
+            info.on(() => {
+                counter++;
+            });
+            error.on(() => {
+                counter++;
+            });
+
+            new MockAdapter();
+            new Bus(adapter).request('some', null, 10)
+                .catch(() => {
+                    expect(counter).toBe(0);
+                    const message = console.getSavedMessages('error');
+                    const info = console.getSavedMessages('info');
+                    expect(info).toHaveLength(0);
+                    expect(String(message[0][0])).toBe('Error: Timeout error for request with name "some" and timeout 10!');
+                    done();
+                });
+        });
+
+        it('Check errors level', done => {
+
+            config.console.logLevel = config.console.LOG_LEVEL.ERRORS;
+            let counter = 0;
+            info.on(() => {
+                counter++;
+            });
+            error.on(e => {
+                expect(String(e)).toBe('Error: Timeout error for request with name "some" and timeout 10!');
+                counter++;
+            });
+
+            new MockAdapter();
+            new Bus(adapter).request('some', null, 10)
+                .catch(() => {
+                    expect(counter).toBe(1);
+                    done();
+                });
+        });
+
+        it('Check verbose level', done => {
+
+            config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
+            let counter = 0;
+            info.on(() => {
+                counter++;
+            });
+            error.on(e => {
+                expect(String(e)).toBe('Error: Timeout error for request with name "some" and timeout 10!');
+                counter++;
+            });
+
+            new MockAdapter();
+            new Bus(adapter).request('some', null, 10)
+                .catch(() => {
+                    expect(counter).toBe(3);
+                    done();
+                });
+        });
+
+        afterAll(() => {
+            consoleModule.error = originError;
+            consoleModule.info = originInfo;
+        });
+
     });
 
     it('change adapter', () => {
@@ -167,7 +270,7 @@ describe('Bus', () => {
             const bus = new Bus(adapter, 50);
 
             bus.request('some-event').catch((e) => {
-                expect(e.message).toBe('Timeout error!');
+                expect(e.message).toBe('Timeout error for request with name "some-event" and timeout 50!');
                 done();
             });
         });
@@ -254,7 +357,7 @@ describe('Bus', () => {
 
             bus.request(requestData.name, null, 100)
                 .catch((e) => {
-                    expect(e.message).toBe('Has no handler for this action!');
+                    expect(e).toBe('Error: Has no handler for "getRequestCount" action!');
                     done();
                 });
         });
@@ -280,7 +383,7 @@ describe('Bus', () => {
 
             bus.request(requestData.name, 10, 100)
                 .catch((e) => {
-                    expect(e.message).toBe('Test error!');
+                    expect(e).toBe('Error: Test error!');
                     done();
                 });
         });

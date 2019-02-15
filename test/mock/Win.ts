@@ -1,11 +1,11 @@
-import { IHash, Signal } from 'ts-utils';
+import { Signal } from 'ts-utils';
 import { WindowAdapter } from '../../src';
 
 
 class Win {
 
     public onPostMessageRun: Signal<any> = new Signal();
-    private _handlers: IHash<Array<Function>> = Object.create(null);
+    private _handlers: Record<string, Array<Function>> = Object.create(null);
 
 
     public postMessage(data: any, origin: string): void {

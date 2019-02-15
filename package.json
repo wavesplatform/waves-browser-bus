@@ -42,5 +42,8 @@
     "build": "tsc --build ./ && npm run _build-full",
     "test": "jest",
     "_build-full": "browserify src/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js"
+  },
+  "dependencies": {
+    "@types/node": "^11.9.4"
   }
 }

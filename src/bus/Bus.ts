@@ -1,4 +1,5 @@
-import { Adapter } from './Adapter';
+import { Adapter } from '../adapters/Adapter';
+import { uniqueId, console } from '../utils';
 
 
 export const enum EventType {
@@ -11,13 +12,6 @@ export const enum ResponseStatus {
     Success,
     Error
 }
-
-let counter = 0;
-
-function uniqueId(prefix: string): string {
-    return `${prefix}-${counter++}`;
-}
-
 
 export class Bus {
 
@@ -36,42 +30,53 @@ export class Bus {
         this._eventHandlers = Object.create(null);
         this._activeRequestHash = Object.create(null);
         this._requestHandlers = Object.create(null);
+
+        console.info(`Create Bus with id "${this.id}"`);
     }
 
     public dispatchEvent(name: string, data?: unknown): this {
         this._adapter.send(Bus._createEvent(name, data));
+        console.info(`Dispatch event "${name}"`, data);
         return this;
     }
 
     public request<T>(name: string, data?: any, timeout?: number): Promise<T> {
         return new Promise<any>((resolve, reject) => {
             const id = uniqueId(`${this.id}-action`);
+            const wait = timeout || this._timeout;
 
-            let timer: number;
+            let timer: number | NodeJS.Timeout;
 
             if ((timeout || this._timeout) !== -1) {
                 timer = setTimeout(() => {
                     delete this._activeRequestHash[id];
-                    reject(new Error('Timeout error!'));
-                }, timeout || this._timeout);
+                    const error = new Error(`Timeout error for request with name "${name}" and timeout ${wait}!`);
+                    console.error(error);
+                    reject(error);
+                }, wait);
             }
+
+            const cancelTimeout = () => {
+                if (timer) {
+                    clearTimeout(timer as number);
+                }
+            };
 
             this._activeRequestHash[id] = {
                 reject: (error: any) => {
-                    if (timer) {
-                        window.clearTimeout(timer);
-                    }
+                    cancelTimeout();
+                    console.error(`Error request with name "${name}"`, error);
                     reject(error);
                 },
-                resolve: (data: any) => {
-                    if (timer) {
-                        window.clearTimeout(timer);
-                    }
+                resolve: (data: T) => {
+                    cancelTimeout();
+                    console.info(`Request with name "${name}" success resolved!`, data);
                     resolve(data);
                 }
             };
 
             this._adapter.send({ id, type: EventType.Action, name, data });
+            console.info(`Request with name "${name}"`, data);
         });
     }
 
@@ -146,6 +151,12 @@ export class Bus {
         return bus;
     }
 
+    public destroy(): void {
+        console.info('Destroy Bus');
+        this.off();
+        this._adapter.destroy();
+    }
+
     private _addEventHandler(name: string, handler: IOneArgFunction<any, void>, context: any, once: boolean): this {
         if (!this._eventHandlers[name]) {
             this._eventHandlers[name] = [];
@@ -159,12 +170,15 @@ export class Bus {
     private _onMessage(message: TMessageContent): void {
         switch (message.type) {
             case EventType.Event:
+                console.info(`Has event with name ${message.name}`, message.data);
                 this._fireEvent(message.name, message.data);
                 break;
             case EventType.Action:
+                console.info(`Start action with id "${message.id}" and name ${message.name}`, message.data);
                 this._createResponse(message);
                 break;
             case EventType.Response:
+                console.info(`Start response with name ${message.id} and status "${message.status}"`, message.content);
                 this._fireEndAction(message);
                 break;
         }
@@ -172,16 +186,17 @@ export class Bus {
 
     private _createResponse(message: IRequestData) {
         const sendError = (error: Error) => {
+            console.error(error);
             this._adapter.send({
                 id: message.id,
                 type: EventType.Response,
                 status: ResponseStatus.Error,
-                content: error
+                content: String(error)
             });
         };
 
         if (!this._requestHandlers[message.name]) {
-            sendError(new Error('Has no handler for this action!'));
+            sendError(new Error(`Has no handler for "${message.name}" action!`));
             return null;
         }
 
@@ -278,7 +293,7 @@ export interface IRequestData {
     chanelId?: TChanelId | undefined;
     type: EventType.Action;
     name: string;
-    data?: object | Array<object>;
+    data?: any;
 }
 
 export interface IResponseData {
@@ -286,7 +301,7 @@ export interface IResponseData {
     chanelId?: TChanelId | undefined;
     type: EventType.Response;
     status: ResponseStatus;
-    content: object | Array<object>;
+    content: any;
 }
 
 interface ISentActionData {
