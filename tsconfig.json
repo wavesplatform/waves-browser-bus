@@ -1,16 +1,12 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
     "module": "commonjs",
     "target": "es5",
-    "sourceMap": true,
-    "skipLibCheck": true,
     "strict": true,
-    "lib": [
-      "dom",
-      "es2015",
-      "es2015.promise"
-    ]
+    "preserveConstEnums": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "./dist"
   },
   "files": [
     "src/index.ts"

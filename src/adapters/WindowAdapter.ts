@@ -1,6 +1,7 @@
 import { Adapter } from './Adapter';
 import { IOneArgFunction, TChanelId, TMessageContent } from '../bus/Bus';
 import { console, uniqueId } from '../utils';
+import { WindowProtocol } from '../protocols/WindowProtocol';
 
 
 export class WindowAdapter extends Adapter {
@@ -44,14 +45,15 @@ export class WindowAdapter extends Adapter {
     }
 
     public destroy(): void {
-
+        // TODO Refactor
         const empty = () => null;
         const fakeData = {
             origin: '',
             win: {
                 postMessage: empty,
                 addEventListener: empty,
-                removeEventListener: empty
+                removeEventListener: empty,
+                origin: ''
             }
         };
 
@@ -105,13 +107,8 @@ export namespace WindowAdapter {
 
     export interface IWindowData {
         origin: string;
-        win: IWindowPart;
-    }
-
-    export interface IWindowPart {
-        postMessage: typeof window['postMessage'];
-        addEventListener: typeof window['addEventListener']
-        removeEventListener: typeof window['removeEventListener'];
+        // TODO Refactor
+        win: WindowProtocol.IWindow;
     }
 
     export interface IOptions {

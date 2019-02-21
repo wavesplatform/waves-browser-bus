@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent</title>
+    <script src="../dist/browser-bus.js"></script>
+</head>
+<body>
+
+<script>
+
+    var { Bus, SimpleWindowAdapter, config } = bus;
+
+    config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
+
+    var iframe = document.createElement('iframe');
+
+    var adapter = new SimpleWindowAdapter(iframe);
+    var myBus = new Bus(adapter);
+
+    myBus.dispatchEvent('How are your?', null);
+
+    myBus.once('hi-from-iframe', data => {
+        console.log('On event "hi-from-iframe":', data);
+    });
+
+    iframe.src = './iframe.html';
+    document.body.appendChild(iframe);
+
+    document.addEventListener('click', function () {
+        const win = window.open('./iframe.html');
+
+        const adapter = new SimpleWindowAdapter(win);
+        const myBus = new Bus(adapter);
+
+        myBus.dispatchEvent('How are your, window?', null);
+
+        myBus.once('hi-from-window', data => {
+            console.log('On event "hi-from-window":', data);
+            myBus.destroy();
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

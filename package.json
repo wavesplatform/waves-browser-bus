@@ -8,7 +8,7 @@
     "browserify": "^16.2.3",
     "jest": "^24.1.0",
     "ts-jest": "^23.10.5",
-    "ts-utils": "^6.0.6",
+    "ts-utils": "^6.0.7",
     "typescript": "^3.3.3"
   },
   "files": [
@@ -41,9 +41,10 @@
     "postpublish": "git push",
     "build": "tsc --build ./ && npm run _build-full",
     "test": "jest",
-    "_build-full": "browserify src/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js"
+    "_build-full": "browserify ./dist/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js"
   },
   "dependencies": {
-    "@types/node": "^11.9.4"
+    "@types/node": "^11.9.4",
+    "typed-ts-events": "^1.0.5"
   }
 }
