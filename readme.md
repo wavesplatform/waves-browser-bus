@@ -1,11 +1,10 @@
-# Browser Bus v0.0.12       
+# Browser Bus     
 [en](https://github.com/wavesplatform/waves-browser-bus/blob/master/README.md) | ru
 
 Библиотека для работы над текстовым протоколом.
 Позволяет реализовать связь например для:
  * двух различных окон браузера
  * окно браузера с iframe
- * две разные страницы браузера на одном домене (через localStorage)
 
 ## Browser Bus API
 
@@ -25,29 +24,36 @@
 
 ### constructor
 Принимает экземпляр класса Adapter отвечающий за реализацию протокола отправки сообщений 
-и время ожидания ответа по умолчанию.
+и время ожидания ответа по умолчанию (в миллисекундах).
+Время ответа не обязательный параметр и по умолчанию равен 5 секунд.
 
-Пример:
+Пример связи iframe и родительского окна:
+
+На стороне родительского окна:
 ```javascript
     import { Bus, WindowAdapter } from '@waves/waves-browser-bus';
 
-    const url = new URL('https://some-iframe-content-url.com');
+    const url = 'https://some-iframe-content-url.com';
     const iframe = document.createElement('iframe');
-    iframe.src = url.toString();
     
-    iframe.addEventListener('load', () => {
-        const listen = {
-              win: window,
-              origin: location.origin
-        };
-        const dispatch = {
-            win: iframe.contentWindow,
-            origin: url.origin
-        };
-        
-        const adapter = new WindowAdapter(listen, dispatch);
+    WindowAdapter.createSimpleWindowAdapter(iframe).then(adapter => {
         const bus = new Bus(adapter);
-    }, false);
+        
+        bus.once('ready', () => {
+            // Получено сообщение от iframe 
+        });
+    });
+    iframe.src = url;
+    
+```
+На стороне iframe:
+```javascript
+    import { Bus, WindowAdapter } from '@waves/waves-browser-bus';
+    WindowAdapter.createSimpleWindowAdapter().then(adapter => {
+        const bus = new Bus(adapter);
+        
+        bus.dispatchEvent('ready', null); // Отправили сообщение в родительское окно
+    });
     
 ```
 
