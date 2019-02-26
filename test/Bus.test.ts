@@ -49,7 +49,7 @@ describe('Bus', () => {
             wasCall++;
         });
 
-        bus.dispatchEvent(eventName);
+        bus.dispatchEvent(eventName, void 0);
 
         adapter.onSend.once((event: TMessageContent) => {
             if (event.type !== EventType.Event) {
@@ -172,7 +172,7 @@ describe('Bus', () => {
         });
 
         const newAdapter = new MockAdapter();
-        const newBus = bus.changeAdapter(newAdapter);
+        bus.changeAdapter(newAdapter);
 
         newAdapter.dispatchAdapterEvent({ name: 'some-request', id: 0, type: EventType.Action });
         newAdapter.dispatchAdapterEvent({ name: 'some-event', type: EventType.Event });
@@ -348,7 +348,7 @@ describe('Bus', () => {
             };
 
             const secondAdapter = new MockAdapter();
-            const secondBus = new Bus(secondAdapter);
+            new Bus(secondAdapter);
 
             adapter.onSend.once((data) => {
                 secondAdapter.onSend.once(d => adapter.dispatchAdapterEvent(d));

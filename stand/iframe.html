@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Iframe</title>
+    <script src="../dist/browser-bus.js"></script>
+</head>
+<body>
+
+<script>
+    var { Bus, SimpleWindowAdapter, config } = bus;
+
+    config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
+
+    var adapter = new SimpleWindowAdapter();
+    var myBus = new Bus(adapter);
+
+    myBus.once('How are your?', data => {
+        console.log('Once event "How are your?"', data);
+    });
+    myBus.dispatchEvent('hi-from-iframe', { key: 'test' });
+
+    myBus.once('How are your, window?', data => {
+        console.log('Once event "How are your?"', data);
+    });
+    myBus.dispatchEvent('hi-from-window', { key: 'test' });
+</script>
+
+</body>
+</html>

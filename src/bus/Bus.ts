@@ -13,7 +13,7 @@ export const enum ResponseStatus {
     Error
 }
 
-export class Bus {
+export class Bus<T extends Record<string, any> = any> {
 
     public id: string = uniqueId('bus');
     private _adapter: Adapter;
@@ -34,8 +34,8 @@ export class Bus {
         console.info(`Create Bus with id "${this.id}"`);
     }
 
-    public dispatchEvent(name: string, data?: unknown): this {
-        this._adapter.send(Bus._createEvent(name, data));
+    public dispatchEvent<K extends keyof T>(name: K, data: T[K]): this {
+        this._adapter.send(Bus._createEvent(name as string, data));
         console.info(`Dispatch event "${name}"`, data);
         return this;
     }
@@ -80,15 +80,17 @@ export class Bus {
         });
     }
 
-    public on(name: string, handler: IOneArgFunction<any, void>, context?: any): this {
-        return this._addEventHandler(name, handler, context, false);
+    public on<K extends keyof T>(name: K, handler: IOneArgFunction<T[K], void>, context?: any): this {
+        return this._addEventHandler(name as string, handler, context, false);
     }
 
-    public once(name: string, handler: IOneArgFunction<any, void>, context?: any): this {
-        return this._addEventHandler(name, handler, context, true);
+    public once<K extends keyof T>(name: K, handler: IOneArgFunction<T[K], void>, context?: any): this {
+        return this._addEventHandler(name as string, handler, context, true);
     }
 
-    public off(name?: string, handler?: IOneArgFunction<any, void>): this {
+    public off(name?: string, handler?: IOneArgFunction<T[keyof T], void>): this
+    public off<K extends keyof T>(name?: K, handler?: IOneArgFunction<T[K], void>): this
+    public off(name?: string, handler?: IOneArgFunction<T[keyof T], void>): this {
         if (!name) {
             Object.keys(this._eventHandlers).forEach((name) => this.off(name, handler));
             return this;
@@ -170,21 +172,21 @@ export class Bus {
     private _onMessage(message: TMessageContent): void {
         switch (message.type) {
             case EventType.Event:
-                console.info(`Has event with name ${message.name}`, message.data);
+                console.info(`Has event with name "${message.name}"`, message.data);
                 this._fireEvent(message.name, message.data);
                 break;
             case EventType.Action:
-                console.info(`Start action with id "${message.id}" and name ${message.name}`, message.data);
+                console.info(`Start action with id "${message.id}" and name "${message.name}"`, message.data);
                 this._createResponse(message);
                 break;
             case EventType.Response:
-                console.info(`Start response with name ${message.id} and status "${message.status}"`, message.content);
+                console.info(`Start response with name "${message.id}" and status "${message.status}"`, message.content);
                 this._fireEndAction(message);
                 break;
         }
     }
 
-    private _createResponse(message: IRequestData) {
+    private _createResponse(message: IRequestData): void {
         const sendError = (error: Error) => {
             console.error(error);
             this._adapter.send({
@@ -197,7 +199,7 @@ export class Bus {
 
         if (!this._requestHandlers[message.name]) {
             sendError(new Error(`Has no handler for "${message.name}" action!`));
-            return null;
+            return void 0;
         }
 
         try {
@@ -239,9 +241,9 @@ export class Bus {
         }
     }
 
-    private _fireEvent(name: string, value: any) {
+    private _fireEvent(name: string, value: any): void {
         if (!this._eventHandlers[name]) {
-            return null;
+            return void 0;
         }
 
         this._eventHandlers[name] = this._eventHandlers[name]

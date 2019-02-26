@@ -1,5 +1,5 @@
 import { Signal } from 'ts-utils';
-import { WindowAdapter } from '../../src';
+import { WindowProtocol } from '../../src/protocols/WindowProtocol';
 
 
 class Win {
@@ -40,7 +40,7 @@ export function mockWindow<T>(): IMockWindow<T> {
     return new Win() as any;
 }
 
-export interface IMockWindow<T> extends WindowAdapter.IWindowPart {
+export interface IMockWindow<T> extends WindowProtocol.IWindow {
     onPostMessageRun: Signal<IPostMessageEvent<T>>;
     runEventListeners(event: string, eventData: any): void;
 }
