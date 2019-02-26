@@ -1,5 +1,7 @@
-import { EventType, IEventData, WindowAdapter } from '../src';
+import { EventType, IEventData, TMessageContent, WindowAdapter } from '../src';
 import { IMockWindow, mockWindow } from './mock/Win';
+import { EventEmitter } from 'typed-ts-events';
+import { WindowProtocol } from '../src/protocols/WindowProtocol';
 
 
 describe('Window adapter', () => {
@@ -11,22 +13,18 @@ describe('Window adapter', () => {
         chanelId: undefined
     };
 
-    let listen: ITestWinData;
-    let dispatch: ITestWinData;
+    let listen: Array<WindowProtocol<TMessageContent>>;
+    let dispatch: Array<WindowProtocol<TMessageContent>>;
     let adapter: WindowAdapter;
+    let listenWin: IMockWindow<TMessageContent> = mockWindow();
+    let dispatchWin: IMockWindow<TMessageContent> = mockWindow();
 
     beforeEach(() => {
-        listen = {
-            win: mockWindow(),
-            origin: 'https://listen-origin.com'
-        };
-
-        dispatch = {
-            win: mockWindow(),
-            origin: 'https://dispatch-origin.com'
-        };
-
-        adapter = new WindowAdapter(listen, dispatch);
+        listenWin = mockWindow();
+        dispatchWin = mockWindow();
+        listen = [new WindowProtocol(listenWin, WindowProtocol.PROTOCOL_TYPES.LISTEN)];
+        dispatch = [new WindowProtocol(dispatchWin, WindowProtocol.PROTOCOL_TYPES.DISPATCH)];
+        adapter = new WindowAdapter(listen, dispatch, {});
     });
 
     describe('check connect by chanel id', () => {
@@ -37,7 +35,7 @@ describe('Window adapter', () => {
 
             adapter = new WindowAdapter(listen, dispatch, {
                 chanelId: 1,
-                availableDomains: ['*'],
+                origins: ['*'],
                 availableChanelId: [2]
             });
 
@@ -45,7 +43,7 @@ describe('Window adapter', () => {
                 ok = event.type === EventType.Event && event.data === 1 && event.name === 'test';
             });
 
-            listen.win.runEventListeners('message', {
+            listenWin.runEventListeners('message', {
                 origin: 'https://some-origin.com',
                 data: {
                     type: EventType.Event,
@@ -56,7 +54,7 @@ describe('Window adapter', () => {
 
             expect(ok).toBe(false);
 
-            listen.win.runEventListeners('message', {
+            listenWin.runEventListeners('message', {
                 origin: 'https://some-origin.com',
                 data: {
                     type: EventType.Event,
@@ -72,17 +70,10 @@ describe('Window adapter', () => {
     });
 
     it('all origin', () => {
-        listen = {
-            win: mockWindow(),
-            origin: '*'
-        };
-
-        dispatch = {
-            win: mockWindow(),
-            origin: '*'
-        };
-
-        adapter = new WindowAdapter(listen, dispatch);
+        listenWin = mockWindow();
+        listen = [new WindowProtocol(listenWin, WindowProtocol.PROTOCOL_TYPES.LISTEN)];
+        dispatch = [new WindowProtocol(mockWindow(), WindowProtocol.PROTOCOL_TYPES.DISPATCH)];
+        adapter = new WindowAdapter(listen, dispatch, { origins: '*' });
 
         let count = 0;
 
@@ -90,21 +81,53 @@ describe('Window adapter', () => {
             count++;
         });
 
-        listen.win.runEventListeners('message', {
+        listenWin.runEventListeners('message', {
             origin: 'https://dispatch-origin.com',
-            data: null
+            data: { ...eventData }
         });
 
         expect(count).toBe(1);
+    });
 
+    it('Exception in handler', () => {
+        let ok = false;
+
+        adapter.addListener(() => {
+            throw new Error('Some error');
+        });
+        adapter.addListener(() => {
+            ok = true;
+        });
+
+        listenWin.runEventListeners('message', {
+            origin: window.location.origin,
+            data: { ...eventData }
+        });
+        expect(ok).toBe(true);
+    });
+
+    it('Wrong event format', () => {
+        let ok = true;
+        adapter.addListener(() => {
+            ok = false;
+        });
+
+        listenWin.runEventListeners('message', {
+            origin: window.location.origin,
+            data: null
+        });
+        listenWin.runEventListeners('message', {
+            origin: window.location.origin,
+            data: {}
+        });
+        expect(ok).toBe(true);
     });
 
     it('send', () => {
         let wasEvent = false;
 
-        dispatch.win.onPostMessageRun.once(message => {
+        dispatchWin.onPostMessageRun.once(message => {
             wasEvent = true;
-            expect(message.origin).toBe(dispatch.origin);
             expect(message.data).toEqual(eventData);
         });
         const sendResult = adapter.send(eventData);
@@ -115,7 +138,7 @@ describe('Window adapter', () => {
 
     it('listen with origin', () => {
         let count = 0;
-        const data = ['test 1', 'test 2'];
+        const data = [{ ...eventData, data: 'test 1' }, { ...eventData, data: 'test 2' }];
 
         const addListenerResult = adapter.addListener((eventData: any) => {
             if (eventData !== data[count]) {
@@ -124,19 +147,19 @@ describe('Window adapter', () => {
             count++;
         });
 
-        listen.win.runEventListeners('message', {
-            origin: listen.origin,
+        listenWin.runEventListeners('message', {
+            origin: window.location.origin,
             data: data[0]
         });
 
-        listen.win.runEventListeners('message', {
-            origin: dispatch.origin,
+        listenWin.runEventListeners('message', {
+            origin: window.location.origin,
             data: data[1]
         });
 
-        listen.win.runEventListeners('message', {
+        listenWin.runEventListeners('message', {
             origin: 'some-origin',
-            data: {}
+            data: eventData
         });
 
         expect(addListenerResult).toBe(adapter);
@@ -147,7 +170,7 @@ describe('Window adapter', () => {
         let wasPostMessage = false;
         let wasListenEvent = false;
 
-        dispatch.win.onPostMessageRun.once(() => {
+        dispatchWin.onPostMessageRun.once(() => {
             wasPostMessage = true;
         });
 
@@ -159,8 +182,8 @@ describe('Window adapter', () => {
         adapter.destroy();
 
         adapter.send(eventData);
-        listen.win.runEventListeners('message', {
-            origin: listen.origin,
+        listenWin.runEventListeners('message', {
+            origin: 'listen.origin',
             data: 'some data'
         });
 
@@ -169,9 +192,84 @@ describe('Window adapter', () => {
         expect(wasListenEvent).toBe(false);
     });
 
-});
+    describe('SimpleWindowAdapter', () => {
 
-interface ITestWinData {
-    win: IMockWindow<any>;
-    origin: string;
-}
+        const addEventListener = window.addEventListener;
+        const removeEventListener = window.removeEventListener;
+        const postMessage = window.postMessage;
+        const emitter = new EventEmitter<any>();
+
+        beforeEach(() => {
+            (window as any).origin = window.location.origin;
+            emitter.off();
+            window.addEventListener = (event: string, handler: any) => {
+                emitter.on(event, handler);
+            };
+            window.removeEventListener = (event: string, handler: any) => {
+                emitter.off(event, handler);
+            };
+            window.postMessage = (data: any, origin: string) => {
+                emitter.trigger('message', { data, origin });
+            };
+        });
+
+        afterAll(() => {
+            window.addEventListener = addEventListener;
+            window.removeEventListener = removeEventListener;
+            window.postMessage = postMessage;
+        });
+
+        it('Create', done => {
+            WindowAdapter.createSimpleWindowAdapter()
+                .then(() => {
+                    done();
+                });
+        });
+
+        it('Add Listener', done => {
+            WindowAdapter.createSimpleWindowAdapter().then(adapter => {
+                let ok = false;
+
+                adapter.addListener(() => {
+                    ok = true;
+                });
+
+                window.postMessage({ type: EventType.Event, name: 'test' }, window.origin);
+                expect(ok).toBe(true);
+                done();
+            });
+        });
+
+        it('Destroy', done => {
+            const win = mockWindow();
+            (window as any).opener = win;
+
+            WindowAdapter.createSimpleWindowAdapter()
+                .then(adapter => {
+                    let listenerCount = 0;
+                    let sendCount = 0;
+
+                    win.onPostMessageRun.on(() => {
+                        sendCount++;
+                    });
+
+                    adapter.addListener(() => {
+                        listenerCount++;
+                    });
+
+
+                    window.postMessage({ type: EventType.Event, name: 'test' }, window.origin);
+                    adapter.send({ type: EventType.Event, data: '', name: 'test' });
+                    adapter.destroy();
+                    adapter.send({ type: EventType.Event, data: '', name: 'test' });
+                    window.postMessage({ type: EventType.Event, name: 'test' }, window.origin);
+
+                    expect(listenerCount).toBe(1);
+                    expect(sendCount).toBe(1);
+                    done();
+                });
+        });
+
+    });
+
+});

@@ -5,22 +5,24 @@ export class WindowProtocol<T> extends EventEmitter<WindowProtocol.IEvents<T>> {
 
     private win: WindowProtocol.IWindow;
     private readonly handler: (event: WindowProtocol.IMessageEvent<T>) => any;
-    private readonly origin: string;
 
-    constructor(win: WindowProtocol.IWindow) {
+
+    constructor(win: WindowProtocol.IWindow, type: WindowProtocol.TProtocolType) {
         super();
 
         this.win = win;
-        this.origin = win.origin;
+
         this.handler = event => {
             this.trigger('message', event);
         };
 
-        this.win.addEventListener('message', this.handler, false);
+        if (type === WindowProtocol.PROTOCOL_TYPES.LISTEN) {
+            this.win.addEventListener('message', this.handler, false);
+        }
     }
 
     public dispatch<R>(data: R): this {
-        this.win.postMessage(data, this.origin);
+        this.win.postMessage(data, '*');
         return this;
     }
 
@@ -34,19 +36,23 @@ export class WindowProtocol<T> extends EventEmitter<WindowProtocol.IEvents<T>> {
         return {
             postMessage: empty,
             addEventListener: empty,
-            removeEventListener: empty,
-            origin: '*'
+            removeEventListener: empty
         };
     })();
 }
 
+/* istanbul ignore next */
 export namespace WindowProtocol {
+
+    export const PROTOCOL_TYPES = {
+        LISTEN: 'listen' as 'listen',
+        DISPATCH: 'dispatch' as 'dispatch'
+    };
 
     export interface IWindow {
         postMessage: typeof window['postMessage'];
         addEventListener: typeof window['addEventListener']
         removeEventListener: typeof window['removeEventListener'];
-        origin: string;
     }
 
     export interface IMessageEvent<T> extends MessageEvent {
@@ -57,4 +63,5 @@ export namespace WindowProtocol {
         message: IMessageEvent<T>;
     }
 
+    export type TProtocolType = 'listen' | 'dispatch';
 }

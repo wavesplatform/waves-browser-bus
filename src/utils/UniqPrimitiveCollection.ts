@@ -18,4 +18,8 @@ export class UniqPrimitiveCollection<T extends keyof any> {
     public has(key: T): boolean {
         return key in this.hash;
     }
+
+    public toArray(): Array<T> {
+        return Object.keys(this.hash) as Array<T>;
+    }
 }
