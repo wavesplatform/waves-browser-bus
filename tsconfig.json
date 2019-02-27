@@ -6,12 +6,13 @@
     "preserveConstEnums": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "declaration": true
   },
   "files": [
     "src/index.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules", "dist"
   ]
 }
