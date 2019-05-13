@@ -102,7 +102,7 @@ export class WindowAdapter extends Adapter {
 
         return this.getIframeContent(iframe)
             .then(win => {
-                const dispatch = new WindowProtocol<TMessageContent>(win, WindowProtocol.PROTOCOL_TYPES.DISPATCH);
+                const dispatch = new WindowProtocol<TMessageContent>(win.win, WindowProtocol.PROTOCOL_TYPES.DISPATCH);
                 const adapter = new WindowAdapter([listen], [dispatch], this.unPrepareOptions(myOptions));
 
                 events.forEach(event => {
@@ -132,18 +132,18 @@ export class WindowAdapter extends Adapter {
         };
     }
 
-    private static getIframeContent(content?: TContent): Promise<IWindow> {
+    private static getIframeContent(content?: TContent): Promise<{ win: IWindow }> {
         if (!content) {
-            return Promise.resolve(window.opener || window.parent);
+            return Promise.resolve({ win: window.opener || window.parent });
         }
         if (!(content instanceof HTMLIFrameElement)) {
-            return Promise.resolve(content);
+            return Promise.resolve({ win: content });
         }
         if (content.contentWindow) {
-            return Promise.resolve(content.contentWindow);
+            return Promise.resolve({ win: content.contentWindow });
         }
         return new Promise((resolve, reject) => {
-            content.addEventListener('load', () => resolve(content.contentWindow as IWindow), false);
+            content.addEventListener('load', () => resolve({ win: content.contentWindow as IWindow }), false);
             content.addEventListener('error', reject, false);
         });
     }
