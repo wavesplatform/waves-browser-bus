@@ -91,7 +91,7 @@ bus.request('some-event-name', jsonLikeData, 100).then(data => {
 Позволяет подписаться на события из Bus.  
 
 Пример:
-```
+```javascript
    bus.on('some-event', data => {
         //data - данные пришедшие в событии  
    });
@@ -102,7 +102,7 @@ bus.request('some-event-name', jsonLikeData, 100).then(data => {
 Позволяет однократно подписаться на события из Bus.  
 
 Пример:
-```
+```javascript
    bus.once('some-event', data => {
         //data - данные пришедшие в событии  
    });
@@ -118,7 +118,7 @@ bus.request('some-event-name', jsonLikeData, 100).then(data => {
 Если параметры не переданы - отпишется от всех событий.
 
 Пример:
-```
+```javascript
    bus.off('some-event', handler); // Отпишется от `some-event` с обработчиком `handler`
    bus.off('some-event'); // Отпишется от всех обработчиков на имя `some-event`
    bus.off(null, handler); // Отпишется во всех именах от обработчика `handler`
@@ -136,7 +136,7 @@ bus.request('some-event-name', jsonLikeData, 100).then(data => {
 Если обработчик возвращает `Promise`, то bus дождется окончания и отправит результат.
 
 Пример:
-```
+```javascript
     // В коде c одним из bus (например в iframe)
     bus.registerRequestHandler('get-random', () => Math.random());
     
@@ -150,7 +150,7 @@ bus.request('some-event-name', jsonLikeData, 100).then(data => {
 
 или
 
-```
+```javascript
     // В коде c одним из bus (например в iframe)
     bus.registerRequestHandler('get-random', () => Promise.resolve(Math.random()));
     
