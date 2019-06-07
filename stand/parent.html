@@ -1,48 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Parent</title>
     <script src="../dist/browser-bus.js"></script>
 </head>
+
 <body>
 
-<script>
+    <script>
 
-    var { Bus, SimpleWindowAdapter, config } = bus;
+        var { Bus, WindowAdapter, config } = bus;
 
-    config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
+        config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
 
-    var iframe = document.createElement('iframe');
+        var PARENT_DATA = { key: 'parent test' };
 
-    var adapter = new SimpleWindowAdapter(iframe);
-    var myBus = new Bus(adapter);
+        var iframe = document.createElement('iframe');
 
-    myBus.dispatchEvent('How are your?', null);
+        // connection with iframe
+        WindowAdapter.createSimpleWindowAdapter(iframe).then(adapter => {
+            const bus = new Bus(adapter);
 
-    myBus.once('hi-from-iframe', data => {
-        console.log('On event "hi-from-iframe":', data);
-    });
+            bus.dispatchEvent('How are you?', PARENT_DATA);
 
-    iframe.src = './iframe.html';
-    document.body.appendChild(iframe);
-
-    document.addEventListener('click', function () {
-        const win = window.open('./iframe.html');
-
-        const adapter = new SimpleWindowAdapter(win);
-        const myBus = new Bus(adapter);
-
-        myBus.dispatchEvent('How are your, window?', null);
-
-        myBus.once('hi-from-window', data => {
-            console.log('On event "hi-from-window":', data);
-            myBus.destroy();
+            bus.once('hi-from-iframe', data => {
+                console.log('On event "hi-from-iframe":', data);
+            });
         });
 
-    });
+        iframe.src = './iframe.html';
+        document.body.appendChild(iframe);
 
-</script>
+
+        // connection with window tab
+        document.addEventListener('click', function () {
+            const win = window.open('./iframe.html');
+
+
+            WindowAdapter.createSimpleWindowAdapter(win).then(adapter => {
+                const bus = new Bus(adapter);
+
+                bus.dispatchEvent('How are your, window?', PARENT_DATA);
+
+                bus.once('hi-from-window', data => {
+                    console.log('On event "hi-from-window":', data);
+                });
+            });
+        });
+
+    </script>
 
 </body>
+
 </html>
