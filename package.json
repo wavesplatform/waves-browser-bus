@@ -3,6 +3,13 @@
   "version": "0.1.5",
   "main": "dist/browser-bus.min.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wavesplatform/waves-browser-bus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wavesplatform/waves-browser-bus/issues"
+  },
   "devDependencies": {
     "@types/jest": "^24.0.4",
     "browserify": "^16.2.3",

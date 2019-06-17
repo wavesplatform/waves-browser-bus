@@ -1,5 +1,4 @@
 # Browser Bus     
-[en](https://github.com/wavesplatform/waves-browser-bus/blob/master/README.md) | ru
 
 Библиотека для работы над текстовым протоколом.
 Позволяет реализовать связь например для:
