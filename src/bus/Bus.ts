@@ -13,14 +13,14 @@ export const enum ResponseStatus {
     Error
 }
 
-export class Bus<T extends Record<string, any> = any> {
+export class Bus<T extends Record<string, any> = any, H extends Record<string, (data: any) => any> = any> {
 
     public id: string = uniqueId('bus');
     private _adapter: Adapter;
     private readonly _activeRequestHash: Record<string, ISentActionData>;
     private readonly _timeout: number;
     private readonly _eventHandlers: Record<string, IEventHandlerData[]>;
-    private readonly _requestHandlers: Record<string, IOneArgFunction<any, any>>;
+    private readonly _requestHandlers: H;
 
 
     constructor(adapter: Adapter, defaultTimeout?: number) {
@@ -40,7 +40,7 @@ export class Bus<T extends Record<string, any> = any> {
         return this;
     }
 
-    public request<T>(name: string, data?: any, timeout?: number): Promise<T> {
+    public request<E extends keyof H>(name: E, data?: Parameters<H[E]>[0], timeout?: number): Promise<ReturnType<H[E]> extends Promise<infer P> ? P : ReturnType<H[E]>> {
         return new Promise<any>((resolve, reject) => {
             const id = uniqueId(`${this.id}-action`);
             const wait = timeout || this._timeout;
@@ -116,7 +116,7 @@ export class Bus<T extends Record<string, any> = any> {
         return this;
     }
 
-    public registerRequestHandler(name: string, handler: IOneArgFunction<any, any>): this {
+    public registerRequestHandler<E extends keyof H>(name: E, handler: H[E]): this {
         if (this._requestHandlers[name]) {
             throw new Error('Duplicate request handler!');
         }
@@ -126,7 +126,7 @@ export class Bus<T extends Record<string, any> = any> {
         return this;
     }
 
-    public unregisterHandler(name: string): this {
+    public unregisterHandler<E extends keyof H>(name: E): this {
         if (this._requestHandlers[name]) {
             delete this._requestHandlers[name];
         }
@@ -172,11 +172,11 @@ export class Bus<T extends Record<string, any> = any> {
     private _onMessage(message: TMessageContent): void {
         switch (message.type) {
             case EventType.Event:
-                console.info(`Has event with name "${message.name}"`, message.data);
-                this._fireEvent(message.name, message.data);
+                console.info(`Has event with name "${String(message.name)}"`, message.data);
+                this._fireEvent(String(message.name), message.data);
                 break;
             case EventType.Action:
-                console.info(`Start action with id "${message.id}" and name "${message.name}"`, message.data);
+                console.info(`Start action with id "${message.id}" and name "${String(message.name)}"`, message.data);
                 this._createResponse(message);
                 break;
             case EventType.Response:
@@ -197,13 +197,13 @@ export class Bus<T extends Record<string, any> = any> {
             });
         };
 
-        if (!this._requestHandlers[message.name]) {
-            sendError(new Error(`Has no handler for "${message.name}" action!`));
+        if (!this._requestHandlers[String(message.name)]) {
+            sendError(new Error(`Has no handler for "${String(message.name)}" action!`));
             return void 0;
         }
 
         try {
-            const result = this._requestHandlers[message.name](message.data);
+            const result = this._requestHandlers[String(message.name)](message.data);
 
             if (Bus._isPromise(result)) {
                 result.then((data) => {
@@ -286,7 +286,7 @@ export type TChanelId = string | number;
 export interface IEventData {
     type: EventType.Event;
     chanelId?: TChanelId | undefined;
-    name: string;
+    name: keyof any;
     data?: any;
 }
 
@@ -294,7 +294,7 @@ export interface IRequestData {
     id: string | number;
     chanelId?: TChanelId | undefined;
     type: EventType.Action;
-    name: string;
+    name: keyof any;
     data?: any;
 }
 
