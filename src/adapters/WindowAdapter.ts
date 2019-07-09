@@ -13,7 +13,6 @@ type TContent = HTMLIFrameElement | WindowProtocol.IWindow;
 export class WindowAdapter extends Adapter {
 
     public readonly id: string = uniqueId('wa');
-    private readonly chanelId: TChanelId | undefined;
     private readonly dispatch: Array<WindowProtocol<TMessageContent>>;
     private readonly listen: Array<WindowProtocol<TMessageContent>>;
     private readonly options: WindowAdapter.IOptions<UniqPrimitiveCollection<string>, UniqPrimitiveCollection<TChanelId>>;
@@ -36,7 +35,7 @@ export class WindowAdapter extends Adapter {
     }
 
     public send(data: TMessageContent): this {
-        const message = { ...data, chanelId: this.chanelId };
+        const message = { ...data, chanelId: this.options.chanelId };
         this.dispatch.forEach(protocol => protocol.dispatch(message));
         console.info('WindowAdapter: Send message', message);
         return this;
