@@ -1,30 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Iframe</title>
     <script src="../dist/browser-bus.js"></script>
 </head>
+
 <body>
 
-<script>
-    var { Bus, SimpleWindowAdapter, config } = bus;
+    <script>
+        var { Bus, WindowAdapter, config } = bus;
 
-    config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
+        var IFRAME_DATA = { key: 'iframe test' };
 
-    var adapter = new SimpleWindowAdapter();
-    var myBus = new Bus(adapter);
+        config.console.logLevel = config.console.LOG_LEVEL.VERBOSE;
 
-    myBus.once('How are your?', data => {
-        console.log('Once event "How are your?"', data);
-    });
-    myBus.dispatchEvent('hi-from-iframe', { key: 'test' });
+        WindowAdapter.createSimpleWindowAdapter().then(adapter => {
+            const myBus = new Bus(adapter);
 
-    myBus.once('How are your, window?', data => {
-        console.log('Once event "How are your?"', data);
-    });
-    myBus.dispatchEvent('hi-from-window', { key: 'test' });
-</script>
+            myBus.once('How are your?', data => {
+                console.log('Once event "How are your?"', data);
+            });
+            myBus.dispatchEvent('hi-from-iframe', IFRAME_DATA);
+
+            myBus.once('How are your, window?', data => {
+                console.log('Once event "How are your?"', data);
+            });
+            myBus.dispatchEvent('hi-from-window', IFRAME_DATA);
+        });
+
+
+    </script>
 
 </body>
+
 </html>
