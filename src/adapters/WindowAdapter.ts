@@ -83,7 +83,7 @@ export class WindowAdapter extends Adapter {
         return access;
     }
 
-    public static createSimpleWindowAdapter(iframe?: TContent, options?: WindowAdapter.IOptions<TOrList<string>, TOrList<TChanelId>>): Promise<WindowAdapter> {
+    public static createSimpleWindowAdapter(iframe?: TContent, options?: Partial<WindowAdapter.IOptions<TOrList<string>, TOrList<TChanelId>>>): Promise<WindowAdapter> {
         const origin = this.getContentOrigin(iframe);
         const myOptions = this.prepareOptions(options);
         const events: Array<WindowProtocol.IMessageEvent<TMessageContent>> = [];

@@ -5,12 +5,14 @@ export class WindowProtocol<T> extends EventEmitter<WindowProtocol.IEvents<T>> {
 
     private win: WindowProtocol.IWindow;
     private readonly handler: (event: WindowProtocol.IMessageEvent<T>) => any;
+    private readonly type: WindowProtocol.TProtocolType;
 
 
     constructor(win: WindowProtocol.IWindow, type: WindowProtocol.TProtocolType) {
         super();
 
         this.win = win;
+        this.type = type;
 
         this.handler = event => {
             this.trigger('message', event);
@@ -27,7 +29,9 @@ export class WindowProtocol<T> extends EventEmitter<WindowProtocol.IEvents<T>> {
     }
 
     public destroy(): void {
-        this.win.removeEventListener('message', this.handler, false);
+        if (this.type === WindowProtocol.PROTOCOL_TYPES.LISTEN) {
+            this.win.removeEventListener('message', this.handler, false);
+        }
         this.win = WindowProtocol._fakeWin;
     }
 
