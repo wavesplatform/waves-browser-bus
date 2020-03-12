@@ -1,5 +1,5 @@
 import { Adapter } from '../adapters/Adapter';
-import { uniqueId, console } from '../utils';
+import { uniqueId } from '../utils';
 
 
 export const enum EventType {
