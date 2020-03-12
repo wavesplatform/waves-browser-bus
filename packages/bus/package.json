@@ -16,7 +16,7 @@
     "jest": "^24.1.0",
     "ts-jest": "^23.10.5",
     "ts-utils": "^6.0.7",
-    "typescript": "^3.3.3",
+    "typescript": "^3.7.3",
     "uglifyjs": "^2.4.11"
   },
   "files": [

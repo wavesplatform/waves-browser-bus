@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../dist/window-adapter.min.js"></script>
+</head>
+<body>
+<iframe src="http://localhost:8081/stand/child.html"></iframe>
+<script>
+
+    const iframe = document.querySelector('iframe');
+    const adapter = window_adapter.WindowAdapter.createByWindow(iframe.contentWindow, {
+        childOrigin: 'http://localhost:8081',
+        channelId: 1,
+        logLevel: 'verbose'
+    });
+
+    adapter.addListener(console.log);
+</script>
+</body>
+</html>

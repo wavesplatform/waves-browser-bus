@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../dist/window-adapter.min.js"></script>
+</head>
+<body>
+<script>
+    const adapter = window_adapter.WindowAdapter.createChildAdapter({
+        parentOrigin: 'http://10.56.1.90:8081',
+        channelId: 1,
+        logLevel: 'verbose'
+    });
+
+    adapter.addListener(console.log);
+    adapter.send({
+        type: 0,
+        name: 'test',
+        data: 123
+    });
+</script>
+</body>
+</html>

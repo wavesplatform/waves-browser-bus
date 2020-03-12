@@ -281,18 +281,15 @@ export interface IOneArgFunction<T, R> {
 }
 
 export type TMessageContent = IEventData | IRequestData | IResponseData;
-export type TChanelId = string | number;
 
 export interface IEventData {
     type: EventType.Event;
-    chanelId?: TChanelId | undefined;
     name: keyof any;
     data?: any;
 }
 
 export interface IRequestData {
     id: string | number;
-    chanelId?: TChanelId | undefined;
     type: EventType.Action;
     name: keyof any;
     data?: any;
@@ -300,7 +297,6 @@ export interface IRequestData {
 
 export interface IResponseData {
     id: string | number;
-    chanelId?: TChanelId | undefined;
     type: EventType.Response;
     status: ResponseStatus;
     content: any;
