@@ -4,7 +4,7 @@ import { keys } from '../utils';
 /* istanbul ignore next */
 const consoleModule = (function (root: { console: Console }) {
     return root.console;
-})(self || global);
+})(typeof self !== undefined ? self : global);
 
 const storage: Record<string, Array<Array<any>>> = Object.create(null);
 
