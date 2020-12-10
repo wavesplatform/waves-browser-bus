@@ -193,7 +193,7 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
                 id: message.id,
                 type: EventType.Response,
                 status: ResponseStatus.Error,
-                content: String(error)
+                content: Bus._dataToMessage(error)
             });
         };
 
@@ -211,7 +211,7 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
                         id: message.id,
                         type: EventType.Response,
                         status: ResponseStatus.Success,
-                        content: data
+                        content: Bus._dataToMessage(data)
                     });
                 }, sendError);
             } else {
@@ -219,7 +219,7 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
                     id: message.id,
                     type: EventType.Response,
                     status: ResponseStatus.Success,
-                    content: result
+                    content: Bus._dataToMessage(result)
                 });
             }
         } catch (e) {
@@ -231,10 +231,10 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
         if (this._activeRequestHash[message.id]) {
             switch (message.status) {
                 case ResponseStatus.Error:
-                    this._activeRequestHash[message.id].reject(message.content);
+                    this._activeRequestHash[message.id].reject(Bus._messageToData(message.content));
                     break;
                 case ResponseStatus.Success:
-                    this._activeRequestHash[message.id].resolve(message.content);
+                    this._activeRequestHash[message.id].resolve(Bus._messageToData(message.content));
                     break;
             }
             delete this._activeRequestHash[message.id];
@@ -262,7 +262,7 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
         }
     }
 
-    static _createEvent(eventName: string, data: any): IEventData {
+    private static _createEvent(eventName: string, data: any): IEventData {
         return {
             type: EventType.Event,
             name: eventName,
@@ -270,10 +270,27 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
         };
     }
 
-    static _isPromise(some: any): some is Promise<any> {
+    private static _isPromise(some: any): some is Promise<any> {
         return some && some.then && typeof some.then === 'function';
     }
 
+    private static _dataToMessage(data: any): IInternalMessage {
+        const type = data instanceof Error ? 'error' : 'data';
+        const content = type === 'error'
+            ? data.message
+            : data;
+        return { type, content };
+    }
+
+    private static _messageToData(message: IInternalMessage): any {
+        if (!message.type || !['error', 'data'].includes(message.type) || !('content' in message)) {
+            return message;
+        }
+        if (message.type === 'error') {
+            return new Error(message.content);
+        }
+        return message.content;
+    }
 }
 
 export interface IOneArgFunction<T, R> {
@@ -315,4 +332,9 @@ interface IEventHandlerData {
     context: any;
     once: boolean;
     handler: IOneArgFunction<any, void>;
+}
+
+interface IInternalMessage {
+    type: 'data' | 'error';
+    content: any
 }

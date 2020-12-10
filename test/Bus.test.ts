@@ -357,7 +357,7 @@ describe('Bus', () => {
 
             bus.request(requestData.name, null, 100)
                 .catch((e) => {
-                    expect(e).toBe('Error: Has no handler for "getRequestCount" action!');
+                    expect(String(e)).toBe('Error: Has no handler for "getRequestCount" action!');
                     done();
                 });
         });
@@ -383,7 +383,8 @@ describe('Bus', () => {
 
             bus.request(requestData.name, 10, 100)
                 .catch((e) => {
-                    expect(e).toBe('Error: Test error!');
+                    console.log(e);
+                    expect(String(e)).toBe('Error: Test error!');
                     done();
                 });
         });
