@@ -52,6 +52,6 @@
   },
   "dependencies": {
     "@types/node": "^11.9.4",
-    "typed-ts-events": "^1.0.5"
+    "typed-ts-events": "1.1.1"
   }
 }
