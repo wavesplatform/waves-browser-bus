@@ -36,12 +36,13 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
 
     public dispatchEvent<K extends keyof T>(name: K, data: T[K]): this {
         this._adapter.send(Bus._createEvent(name as string, data));
-        console.info(`Dispatch event "${name}"`, data);
+        console.info(`Dispatch event "${String(name)}"`, data);
         return this;
     }
 
     public request<E extends keyof H>(name: E, data?: Parameters<H[E]>[0], timeout?: number): Promise<ReturnType<H[E]> extends Promise<infer P> ? P : ReturnType<H[E]>> {
         return new Promise<any>((resolve, reject) => {
+            const requestName = String(name);
             const id = uniqueId(`${this.id}-action`);
             const wait = timeout || this._timeout;
 
@@ -50,7 +51,7 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
             if ((timeout || this._timeout) !== -1) {
                 timer = setTimeout(() => {
                     delete this._activeRequestHash[id];
-                    const error = new Error(`Timeout error for request with name "${name}" and timeout ${wait}!`);
+                    const error = new Error(`Timeout error for request with name "${requestName}" and timeout ${wait}!`);
                     console.error(error);
                     reject(error);
                 }, wait);
@@ -65,18 +66,18 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
             this._activeRequestHash[id] = {
                 reject: (error: any) => {
                     cancelTimeout();
-                    console.error(`Error request with name "${name}"`, error);
+                    console.error(`Error request with name "${requestName}"`, error);
                     reject(error);
                 },
                 resolve: (data: T) => {
                     cancelTimeout();
-                    console.info(`Request with name "${name}" success resolved!`, data);
+                    console.info(`Request with name "${requestName}" success resolved!`, data);
                     resolve(data);
                 }
             };
 
             this._adapter.send({ id, type: EventType.Action, name, data });
-            console.info(`Request with name "${name}"`, data);
+            console.info(`Request with name "${requestName}"`, data);
         });
     }
 
@@ -187,13 +188,15 @@ export class Bus<T extends Record<string, any> = any, H extends Record<string, (
     }
 
     private _createResponse(message: IRequestData): void {
-        const sendError = (error: Error) => {
-            console.error(error);
+        const sendError = (error: unknown) => {
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+
+            console.error(normalizedError);
             this._adapter.send({
                 id: message.id,
                 type: EventType.Response,
                 status: ResponseStatus.Error,
-                content: Bus._dataToMessage(error)
+                content: Bus._dataToMessage(normalizedError)
             });
         };
 

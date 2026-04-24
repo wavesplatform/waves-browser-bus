@@ -1,5 +1,5 @@
 import { Adapter, TMessageContent, IOneArgFunction } from '../../src';
-import { Signal } from 'ts-utils';
+import { Signal } from './Signal';
 
 
 export class MockAdapter extends Adapter {

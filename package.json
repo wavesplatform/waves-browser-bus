@@ -11,19 +11,20 @@
     "url": "https://github.com/wavesplatform/waves-browser-bus/issues"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.4",
-    "browserify": "^16.2.3",
-    "jest": "^24.1.0",
-    "ts-jest": "^23.10.5",
-    "ts-utils": "^6.0.7",
-    "typescript": "^3.3.3",
-    "uglifyjs": "^2.4.11"
+    "@types/jest": "^30.0.0",
+    "esbuild": "^0.28.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "ts-jest": "^29.4.9",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.9"
   },
   "files": [
     "dist"
   ],
   "jest": {
     "collectCoverage": true,
+    "testEnvironment": "jsdom",
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/test/"
@@ -42,16 +43,11 @@
   },
   "scripts": {
     "patch": "npm version patch && npm publish && git push",
-    "prepare": "npm run build",
-    "preversion": "npm run test",
-    "postversion": "npm publish",
-    "postpublish": "git push",
     "build": "tsc --build ./ && npm run _build-full",
     "test": "jest",
-    "_build-full": "browserify ./dist/index.js -s bus -o ./dist/browser-bus.js && uglifyjs ./dist/browser-bus.js -o ./dist/browser-bus.min.js"
+    "_build-full": "vite build && vite build --mode min"
   },
   "dependencies": {
-    "@types/node": "^11.9.4",
-    "typed-ts-events": "1.1.1"
+    "@types/node": "^25.6.0"
   }
 }

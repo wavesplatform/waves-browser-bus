@@ -1,6 +1,6 @@
 import { Bus, EventType, TMessageContent, console, config } from '../src';
 import { MockAdapter } from './mock/MockAdapter';
-import { Signal } from 'ts-utils';
+import { Signal } from './mock/Signal';
 
 
 describe('Bus', () => {
@@ -68,7 +68,7 @@ describe('Bus', () => {
 
         const consoleModule = (function (root: { console: Console }) {
             return root.console;
-        })(self || global);
+        })(typeof self !== 'undefined' ? self : global);
 
         const originError = consoleModule.error;
         const originInfo = consoleModule.info;
