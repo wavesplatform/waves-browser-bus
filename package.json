@@ -1,6 +1,6 @@
 {
   "name": "@waves/waves-browser-bus",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
@@ -53,5 +53,10 @@
   },
   "dependencies": {
     "@types/node": "^25.9.2"
+  },
+  "overrides": {
+    "glob": "^13.0.6",
+    "jsdom": "^29.1.1",
+    "test-exclude": "^7.0.1"
   }
 }
