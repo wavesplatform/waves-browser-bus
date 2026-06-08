@@ -1,4 +1,4 @@
-import { EventEmitter } from 'typed-ts-events';
+import { EventEmitter } from '../utils';
 
 
 export class WindowProtocol<T> extends EventEmitter<WindowProtocol.IEvents<T>> {

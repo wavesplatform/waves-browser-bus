@@ -8,6 +8,10 @@
       "dom",
       "es2015",
       "es2015.promise"
+    ],
+    "types": [
+      "jest",
+      "node"
     ]
   },
   "exclude": [

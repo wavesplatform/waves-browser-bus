@@ -1,7 +1,7 @@
 import { EventType, IEventData, TMessageContent, WindowAdapter } from '../src';
 import { IMockWindow, mockWindow } from './mock/Win';
-import { EventEmitter } from 'typed-ts-events';
-import { WindowProtocol } from '../src/protocols/WindowProtocol';
+import { EventEmitter } from '../src';
+import { WindowProtocol } from '../src';
 
 
 describe('Window adapter', () => {
@@ -202,13 +202,13 @@ describe('Window adapter', () => {
         beforeEach(() => {
             (window as any).origin = window.location.origin;
             emitter.off();
-            window.addEventListener = (event: string, handler: any) => {
+            (window as any).addEventListener = (event: string, handler: any) => {
                 emitter.on(event, handler);
             };
-            window.removeEventListener = (event: string, handler: any) => {
+            (window as any).removeEventListener = (event: string, handler: any) => {
                 emitter.off(event, handler);
             };
-            window.postMessage = (data: any, origin: string) => {
+            (window as any).postMessage = (data: any, origin: string) => {
                 emitter.trigger('message', { data, origin });
             };
         });

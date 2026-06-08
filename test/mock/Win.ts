@@ -1,5 +1,5 @@
-import { Signal } from 'ts-utils';
-import { WindowProtocol } from '../../src/protocols/WindowProtocol';
+import { Signal } from './Signal';
+import { WindowProtocol } from '../../src';
 
 
 class Win {
