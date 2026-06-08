@@ -15,9 +15,9 @@
     "esbuild": "^0.28.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
-    "ts-jest": "^29.4.9",
+    "ts-jest": "^29.4.11",
     "typescript": "^6.0.3",
-    "vite": "^8.0.13"
+    "vite": "^8.0.16"
   },
   "files": [
     "dist"
@@ -35,19 +35,23 @@
       "js"
     ],
     "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
+      "^.+\\.(ts|tsx)$": [
+        "ts-jest",
+        {
+          "tsconfig": "test/tsconfig.json"
+        }
+      ]
     },
     "testMatch": [
       "**/test/*test.+(ts)"
     ]
   },
   "scripts": {
-    "patch": "npm version patch && npm publish && git push",
     "build": "tsc --build ./ && npm run _build-full",
     "test": "jest",
     "_build-full": "vite build && vite build --mode min"
   },
   "dependencies": {
-    "@types/node": "^25.8.0"
+    "@types/node": "^25.9.2"
   }
 }

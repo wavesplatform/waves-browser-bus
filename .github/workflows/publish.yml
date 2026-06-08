@@ -1,0 +1,18 @@
+name: Publish NPM package
+on:
+  push:
+    branches: [ 'master' ]
+  release:
+    types: [ published ]
+
+jobs:
+  publish:
+    uses: wavesplatform/publish-to-npm/.github/workflows/publish.yml@7d9462af686d83552d72097bf47a892e43d11f6e
+    with:
+      environment: NPMJS
+      event_name: ${{ github.event_name }}
+      test: true
+      version: ${{ github.event.release.tag_name }}
+    permissions:
+      id-token: write
+      contents: read
