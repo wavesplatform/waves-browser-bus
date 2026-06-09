@@ -49,7 +49,8 @@
   "scripts": {
     "build": "tsc --build ./ && npm run _build-full",
     "test": "jest",
-    "_build-full": "vite build && vite build --mode min"
+    "_build-full": "vite build && vite build --mode min",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@types/node": "^25.9.2"
